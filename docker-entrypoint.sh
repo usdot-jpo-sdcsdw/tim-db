@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/bash -xe
 
-/entrypoint.sh $@ &
+/mongodb-docker-entrypoint.sh $@ &
 MONGO_PID=$!
 
 TRAVELER_INFORMATION='db.'$TRAVELER_INFORMATION_COLLECTION_NAME
 SESSION='db.'$SESSION_COLLECTION_INDEX
 EXPIRATION_INDEX='{ "'$EXPIRATION_INDEX_FIELD'" : 1 }'
-EXPIRATION_INDEX_OPTS='{ "expireAfterSeconds" : 0, "backround" : true }'
+EXPIRATION_INDEX_OPTS='{ "expireAfterSeconds" : 0, "background" : true }'
 SERVICE_REGION_INDEX='{ "'$SERVICE_REGION_INDEX_FIELD'" : "2dsphere", "'$CREATION_TIME_INDEX_FIELD'" : 1}'
 SERVICE_REGION_INDEX_OPTS='{ "background" : true }'
 REQUEST_ID_INDEX='{ "'$REQUEST_ID_INDEX_FIELD'" : 1, "'$CREATION_TIME_INDEX_FIELD'" : 1 }'
@@ -15,10 +15,9 @@ CREATION_TIME_INDEX='{ "'$CREATION_TIME_INDEX_FIELD'" : 1 }'
 CREATION_TIME_INDEX_OPTS='{ "background" : 1 }'
 
 
-while true; do
-    echo exit | mongo && break;
+while ! mongo $MONGO_DATABASE_NAME --eval ';'; do
     echo 'Index creation is waiting for the mongo instance to be ready...'
-    sleep 1;
+    sleep 2;
 done
 
 echo 'Index creation starting...'
@@ -43,6 +42,6 @@ echo 'Executing command:'
 
 echo "$MONGO_COMMAND"
 
-echo "$MONGO_COMMAND" | mongo $MONGO_DATABASE_NAME
+mongo $MONGO_DATABASE_NAME --eval "$MONGO_COMMAND"
 
 wait $MONGO_PID

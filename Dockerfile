@@ -8,9 +8,9 @@ ENV CREATION_TIME_INDEX_FIELD=createdAt
 ENV SERVICE_REGION_INDEX_FIELD=region
 ENV REQUEST_ID_INDEX_FIELD=requestId
 
-COPY traveler-information-db-docker-entrypoint.sh /traveler-information-db-docker-entrypoint.sh
+RUN mv /entrypoint.sh /mongodb-docker-entrypoint.sh
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-RUN chmod +x /traveler-information-db-docker-entrypoint.sh
-
-ENTRYPOINT ["/traveler-information-db-docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["mongod"]
